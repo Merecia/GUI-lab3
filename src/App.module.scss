@@ -12,18 +12,15 @@ ul {
 
 .App {
     display: flex;
-    justify-content: center;
-    align-items: center;
     background-color: #ffdadada;
-    height: 100vh;
+    height: 100%;
 
     .Form {
-
         background-color: white;
         border-radius: 10px;
         width: 40%;
         padding: 20px 0px;
-        margin: 0 auto;
+        margin: 11% auto;
         border: 1px solid black;
 
         .Top {

@@ -3,17 +3,25 @@ import style from './App.module.scss';
 import Button from './components/Button/Button';
 import Input from './components/Input/Input';
 import Popup from './components/Popup/Popup';
+import Table from './components/Table/Table';
 
 function App() {
 
   const [functionIndex, setFunctionIndex] = useState('1');
-  const [x, setX] = useState(null);
   const [results, setResults] = useState(null);
-  const [modal, setModal] = useState(false);
 
-  const togglePopup = () => setModal(!modal);
+  const [leftLimit, setLeftLimit] = useState('');
+  const [rightLimit, setRightLimit] = useState('');
+  const [amountOfPoints, setAmountOfPoints] = useState('');
+
+  const [popup, setModal] = useState(false);
+  const [message, setMessage] = useState(null);
+
+  const togglePopup = () => setModal(!popup);
   const radioButtonChangeHandler = event => setFunctionIndex(event.target.value);
-  const pointInputChangeHandler = event => setX(event.target.value);
+  const leftLimitInputChangeHandler = event => setLeftLimit(event.target.value);
+  const rightLimitInputChangeHandler = event => setRightLimit(event.target.value);
+  const amountOfPointsInputChangeHandler = event => setAmountOfPoints(event.target.value);
 
   const f1 = x => 10 ** (1 + x ** 2) - 10 ** (1 - x ** 2);
   const f2 = x => Math.tan(3 * x - 156) + Math.tan(x) - 4 * Math.sin(x);
@@ -41,50 +49,77 @@ function App() {
 
   }
 
+  function round(number, accuracy) {
+
+    const digitsAfterComa = String(accuracy).split('.')[1].length
+
+    return Math.round(number * 10 * digitsAfterComa) / (digitsAfterComa * 10)
+
+  }
+
   function calculate() {
 
     const results = {}
+    const calculations = [];
 
-    results.x = x;
+    const step = (Number(rightLimit) - Number(leftLimit)) / (Number(amountOfPoints) - 1);
 
     switch (functionIndex) {
 
       case '1':
-        results.y = f1(x);
         results.formula = formula1;
-        setResults(results);
+        for (let x = Number(leftLimit); x <= Number(rightLimit); x += Number(step)) {
+          x = round(x, 0.0001);
+          const y = round(f1(x), 0.0001);
+          calculations.push({ x, y });
+        }
         break;
 
       case '2':
-        results.y = f2(x);
         results.formula = formula2;
-        setResults(results);
+        for (let x = Number(leftLimit); x <= Number(rightLimit); x += Number(step)) {
+          x = round(x, 0.0001);
+          const y = round(f2(x), 0.0001);
+          calculations.push({ x, y });
+        }
         break;
-
-      default:
-        setResults(null);
 
     }
 
+    results.calculations = calculations;
+
+    setResults(results);
+
   }
 
-  const isValid = () => /^-?\d+$/.test(x);
+  const isNumber = string => /^-?\d+$/.test(string);
 
-  function renderResults() {
+  function isValid() {
 
-    const { x, y, formula } = results;
+    if (isNumber(leftLimit) && isNumber(rightLimit) && isNumber(amountOfPoints)) {
 
-    return <div className={style.Results}>
+      if (Number(rightLimit) < Number(leftLimit)) {
 
-      <hr />
+        setMessage('The right limit should be larger than the left');
 
-      <p> f(x) = {formula} </p>
+        return false;
+      }
 
-      <p> x = {x} </p>
+      if (Number(amountOfPoints) < 2) {
 
-      <p> f({x}) = {y} </p>
+        setMessage('The amount of points must be at least 2');
 
-    </div>
+        return false;
+      }
+
+      return true;
+
+    } else {
+
+      setMessage('You entered incorrect data. You should enter the numbers');
+
+      return false;
+    }
 
   }
 
@@ -92,10 +127,10 @@ function App() {
     <div className={style.App}>
 
       {
-        modal &&
+        popup &&
         <Popup
           handleClose={togglePopup}
-          text='You entered incorrect data. You should enter the number'
+          text={message}
         />
       }
 
@@ -140,15 +175,31 @@ function App() {
           </ul>
 
           <Input
-            placeholder="Enter x"
-            value={x}
-            onChange={pointInputChangeHandler}
+            placeholder='Enter the left limit'
+            value={leftLimit}
+            onChange={leftLimitInputChangeHandler}
+            onKeyPress={inputKeyPressHandler}
+            width='90%'
+          />
+
+          <Input
+            placeholder='Enter the right limit'
+            value={rightLimit}
+            onChange={rightLimitInputChangeHandler}
+            onKeyPress={inputKeyPressHandler}
+            width='90%'
+          />
+
+          <Input
+            placeholder='Enter the amount of points'
+            value={amountOfPoints}
+            onChange={amountOfPointsInputChangeHandler}
             onKeyPress={inputKeyPressHandler}
             width='90%'
           />
 
           <Button
-            isActive={x ? true : false}
+            isActive={leftLimit && rightLimit && amountOfPoints ? true : false}
             onClick={calculateButtonClickHandler}
             color='Blue'
             width='90%'
@@ -161,7 +212,14 @@ function App() {
 
         <div className={style.Bottom}>
 
-          {results ? renderResults() : null}
+          {
+            results
+              ? <Table
+                formula={results.formula}
+                calculations={results.calculations}
+              />
+              : null
+          }
 
         </div>
 
