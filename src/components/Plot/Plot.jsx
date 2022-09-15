@@ -4,14 +4,16 @@ import { VictoryChart, VictoryLine, VictoryScatter } from 'victory';
 import { COLORS } from './colors.js'
 
 const cartesianInterpolations = [
-    "linear",
-    "natural"
+    "Linear",
+    "Natural"
 ];
 
 function InterpolationSelect ({ currentValue, values, onChange }) {
 
     return <select onChange={onChange} value={currentValue} style={{ width: 75 }}>
+
         { values.map(value => <option value={value} key={value}>{value}</option>) }
+
     </select>
 
 };
@@ -23,7 +25,9 @@ function Plot({ data }) {
     const [selectedColor, setSelectedColor] = useState('#059669');
 
     useEffect(() => {
+
         setColors(Object.keys(COLORS).map(colorName => COLORS[colorName]));
+        
     }, [])
 
     return (
