@@ -4,6 +4,7 @@ import Button from './components/Button/Button';
 import Input from './components/Input/Input';
 import Popup from './components/Popup/Popup';
 import Table from './components/Table/Table';
+import Plot from './components/Plot/Plot';
 
 function App() {
 
@@ -92,7 +93,7 @@ function App() {
 
   }
 
-  const isNumber = string => /^-?\d+$/.test(string);
+  const isNumber = string => /^-?\d+(\.\d+)?$/.test(string);
 
   function isValid() {
 
@@ -120,6 +121,34 @@ function App() {
 
       return false;
     }
+
+  }
+
+  function renderTable() {
+
+    return <Table
+      formula={results.formula}
+      calculations={results.calculations}
+    />
+
+  }
+
+  function renderPlot() {
+
+    return <Plot data = {results.calculations} />
+
+  }
+
+  function renderResults() {
+
+    return <div className={style.Results}>
+
+      { renderTable() }
+
+      { renderPlot() }
+
+    </div>
+
 
   }
 
@@ -213,12 +242,7 @@ function App() {
         <div className={style.Bottom}>
 
           {
-            results
-              ? <Table
-                formula={results.formula}
-                calculations={results.calculations}
-              />
-              : null
+            results ? renderResults() : null
           }
 
         </div>
